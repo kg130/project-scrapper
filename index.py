@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import pandas as pd
+import os
 
 import src.requests as requests
 import src.scrapper as scrapper
@@ -34,15 +35,18 @@ def projectMeta():
             url = baseUrl + project
             page = requests.getPage(url.strip())
             soup = BeautifulSoup(page, 'html.parser')
-            checkProjectFile = open('check-project.txt', "a")
+            checkProjectFile = open('output/check-project.txt', "a")
             metaInfo = scrapper.getProjectInfo(soup, checkProjectFile, url)
             projectsMeta.append(metaInfo)
             
             # Writing out after loop in case it terminates of an error
             df = pd.DataFrame.from_dict(projectsMeta, orient='columns')
-            df.to_csv('output.csv', index=False)
+            df.to_csv('output/output.csv', index=False)
+            df.to_stata('output/output.dta', version=117)
             print('project done: ', project)
 
 #Start Main Function
 if __name__ == "__main__":
+    if not os.path.exists('output'):
+        os.mkdir('output') 
     projectMeta()

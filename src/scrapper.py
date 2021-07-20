@@ -59,9 +59,7 @@ def getProjectInfo(soup, fileInst, link):
 
         rows = financeTable[0].find_all('tr')
 
-        if (len(rows) != 6):
-            appendLink = True
-        else:
+        if (len(rows) == 6):
             rowFiveValues = rows[5].find_all('td')
             if (len(rowFiveValues) != 6):
                 appendLink = True
@@ -76,6 +74,28 @@ def getProjectInfo(soup, fileInst, link):
                         for j in [1, 2, 3, 4]:
                             key = headers[1] + ' - ' + columnSubHead[j + 1].get_text() + ' - ' + rowCells[i - 1][2].get_text()
                             metaList[key] = rowCells[i][j + 1].get_text().replace("\n", ' ')
+
+        elif (len(rows) == 4):
+            rowFourValues = rows[3].find_all('td')
+            if (len(rowFourValues) != 9):
+                appendLink = True
+            else:
+                headers = ['Financing Plan', 'Cumulative Disbursements']
+                columnSubHead = rows[1].find_all('td')
+                rowThreeHead = rows[2].find_all('td')
+                for i in [0, 1, 2, 3, 4, 5, 6, 7, 8]:
+                    if (i <= 1):
+                        metaList[headers[0] + ' - ' + columnSubHead[i].get_text()] = rowFourValues[i].get_text().replace("\n", ' ')
+                    elif (i > 1 and i < 6):
+                        key = headers[0] + ' - ' + columnSubHead[2].get_text() + ' - ' + rowThreeHead[i - 2].get_text()
+                        metaList[key] = rowFourValues[i].get_text().replace("\n", ' ')
+                    elif (i == 6):
+                        metaList[headers[0] + ' - ' + columnSubHead[i - 3].get_text()] = rowFourValues[i].get_text().replace("\n", ' ')
+                    else:
+                        metaList[headers[1] + ' - ' + columnSubHead[i - 3].get_text()] = rowFourValues[i].get_text().replace("\n", ' ')
+
+        else:
+            appendLink = True
 
     if (appendLink):
         fileInst.write(link)
