@@ -19,11 +19,14 @@ def getProjectInfo(soup, fileInst, link):
     if (tableList):
         for table in tableList:
             rows = table.find_all('tr')
-
+            headRow = rows[0].find('th')
             for row in rows:
                 cells = row.find_all('td')
                 if (cells):
-                    metaList[cells[0].string] = cells[1].get_text().replace("\n", ' ')
+                    if (headRow):
+                        metaList[headRow.get_text() + ' - ' + cells[0].string] = cells[1].get_text().replace("\n", ' ')
+                    else:
+                        metaList[cells[0].string] = cells[1].get_text().replace("\n", ' ')
 
     # Milestone Table
     milestoneTable = soup.find_all('table', class_='milestones')
