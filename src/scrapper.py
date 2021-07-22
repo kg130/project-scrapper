@@ -1,3 +1,6 @@
+from bs4 import NavigableString, Comment
+
+
 def getProjectList(soup):
     projectList = soup.find('div', class_='list')
     projectIdList = []
@@ -10,6 +13,16 @@ def getProjectList(soup):
 
     return projectIdList
 
+
+def getValue(cell):
+    a = ''
+    for child in cell.children:
+        if isinstance(child, NavigableString) and not isinstance(child, Comment):
+            a+=(child.strip().replace('\n', '\t'))
+        else:
+            a+=(child.get_text().strip().replace('\n', '\t'))
+        a+=('\t')
+    return a
 
 def getProjectInfo(soup, fileInst, link):
     metaList = {}
@@ -24,9 +37,9 @@ def getProjectInfo(soup, fileInst, link):
                 cells = row.find_all('td')
                 if (cells):
                     if (headRow):
-                        metaList[headRow.get_text() + ' - ' + cells[0].string] = cells[1].get_text().replace("\n", ' ')
+                        metaList[headRow.get_text() + ' - ' + cells[0].string] = getValue(cells[1])
                     else:
-                        metaList[cells[0].string] = cells[1].get_text().replace("\n", ' ')
+                        metaList[cells[0].string] = getValue(cells[1])
 
     # Milestone Table
     milestoneTable = soup.find_all('table', class_='milestones')
@@ -48,9 +61,9 @@ def getProjectInfo(soup, fileInst, link):
 
             while(ind < columnNum):
                 if (ind < 3):
-                    metaList[header + ' - ' + columnSubHead[ind].get_text()] = values[ind].get_text().replace("\n", ' ')
+                    metaList[header + ' - ' + columnSubHead[ind].get_text()] = getValue(values[ind])
                 else:
-                    metaList[header + ' - ' + columnSubHead[3].get_text() + ' - ' + columnSubSubHead[ind - 3].get_text()] = values[ind].get_text().replace("\n", ' ')
+                    metaList[header + ' - ' + columnSubHead[3].get_text() + ' - ' + columnSubSubHead[ind - 3].get_text()] = getValue(values[ind])
 
                 ind += 1
 
@@ -72,11 +85,11 @@ def getProjectInfo(soup, fileInst, link):
                 rowCells = {}
                 for i in [1, 2, 3, 4]:
                     rowCells[i] = rows[i + 1].find_all('td')
-                    metaList[headers[0] + ' - ' + rowCells[i][0].get_text()] = rowCells[i][1].get_text().replace("\n", ' ')
+                    metaList[headers[0] + ' - ' + rowCells[i][0].get_text()] = getValue(rowCells[i][1])
                     if (i % 2 == 0):
                         for j in [1, 2, 3, 4]:
                             key = headers[1] + ' - ' + columnSubHead[j + 1].get_text() + ' - ' + rowCells[i - 1][2].get_text()
-                            metaList[key] = rowCells[i][j + 1].get_text().replace("\n", ' ')
+                            metaList[key] = getValue(rowCells[i][j + 1])
 
         elif (len(rows) == 4):
             rowFourValues = rows[3].find_all('td')
@@ -88,14 +101,14 @@ def getProjectInfo(soup, fileInst, link):
                 rowThreeHead = rows[2].find_all('td')
                 for i in [0, 1, 2, 3, 4, 5, 6, 7, 8]:
                     if (i <= 1):
-                        metaList[headers[0] + ' - ' + columnSubHead[i].get_text()] = rowFourValues[i].get_text().replace("\n", ' ')
+                        metaList[headers[0] + ' - ' + columnSubHead[i].get_text()] = getValue(rowFourValues[i])
                     elif (i > 1 and i < 6):
                         key = headers[0] + ' - ' + columnSubHead[2].get_text() + ' - ' + rowThreeHead[i - 2].get_text()
-                        metaList[key] = rowFourValues[i].get_text().replace("\n", ' ')
+                        metaList[key] = getValue(rowFourValues[i])
                     elif (i == 6):
-                        metaList[headers[0] + ' - ' + columnSubHead[i - 3].get_text()] = rowFourValues[i].get_text().replace("\n", ' ')
+                        metaList[headers[0] + ' - ' + columnSubHead[i - 3].get_text()] = getValue(rowFourValues[i])
                     else:
-                        metaList[headers[1] + ' - ' + columnSubHead[i - 3].get_text()] = rowFourValues[i].get_text().replace("\n", ' ')
+                        metaList[headers[1] + ' - ' + columnSubHead[i - 3].get_text()] = getValue(rowFourValues[i])
 
         else:
             appendLink = True
